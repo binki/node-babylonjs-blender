@@ -45,7 +45,14 @@ route.
 
 ## CLI
 
-The CLI is quite simplified but it does (pointlessly, for now) support batching.
+Depending on how you use `npm`, the following might be how
+you obtain this tool:
+
+    $ npm install -g babylonjs-blender
+
+The CLI is quite simplified but it does (pointlessly, for now) support
+batching. Just specify all of the files that need to be exported as
+arguments:
 
     $ node-babylonjs-blender myBlendFile1.blend myBlendFile2.blend
 
@@ -79,3 +86,8 @@ resolution incidates success/completion.
     babylonjsBlender('myFile.blend', 'myFile.babylon').then(() => {
       console.log('Blender finished.');
     });
+
+To reference in your project, install [the npm `babylonjs-blender`
+package](https://www.npmjs.com/package/babylonjs-blender) package:
+
+    $ npm install --save babylonjs-blender
