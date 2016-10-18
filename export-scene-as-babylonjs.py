@@ -23,3 +23,4 @@ elif hasattr(bpy.ops.scene, 'babylon'):
     bpy.ops.scene.babylon(filepath=output)
 else:
     print('Blender BabylonJS Export AddOn API not found anywhere. Please ensure you have installed the addon available at https://github.com/BabylonJS/Babylon.js/tree/master/Exporters/Blender into Blender and saved your user preferences or file a bug at https://github.com/binki/node-babylonjs-blender/issues.', file=sys.stderr)
+    sys.exit(1)
