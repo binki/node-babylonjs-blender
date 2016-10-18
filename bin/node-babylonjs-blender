@@ -2,7 +2,7 @@
 /* -*- mode: js; -*- */
 'use strict';
 
-const babylonjsBlender = require('babylonjs-blender');
+const babylonjsBlender = require('../index.js');
 const nodeGetopt = require('node-getopt');
 const path = require('path');
 
