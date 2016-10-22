@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/binki/node-babylonjs-blender.svg?branch=master)](https://travis-ci.org/binki/node-babylonjs-blender)
+
 # Synopsis
 
 This makes it easier (hopefully) to export a Blender scene as
