@@ -2,7 +2,7 @@ language: node_js
 
 node_js:
   - node
-  - iojs
+  # 4 is stable on Gentoo/node LTS. So keeping support with that is worth it.
   - 4
 
 sudo: required
