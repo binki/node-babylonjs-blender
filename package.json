@@ -4,8 +4,10 @@
   "description": "Invoke blender to run the babylonjs exporter on a scene.",
   "main": "index.js",
   "scripts": {
-    "test": "node test.js",
-    "node-babylonjs-blender": "node-babylonjs-blender"
+    "test": "node test.js"
+  },
+  "bin": {
+    "node-babylonjs-blender": "bin/node-babylonjs-blender.js"
   },
   "repository": {
     "type": "git",
