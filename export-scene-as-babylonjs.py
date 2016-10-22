@@ -16,9 +16,11 @@ bpy.ops.wm.open_mainfile(filepath=input)
 # mkdir(dirname(filepath)) if not path.isdir(dirname(filepath)) which
 # fails when filepath has no slashes in it.
 output = os.path.abspath(output)
-if hasattr(bpy.ops, 'bjs'):
+# Correct way to check for operator existence:
+# https://developer.blender.org/T38120
+if 'bjs' in dir(bpy.ops):
     bpy.ops.bjs.main(filepath=output)
-elif hasattr(bpy.ops.scene, 'babylon'):
+elif 'babylon' in dir(bpy.ops.scene):
     # Fallback to old name of API.
     bpy.ops.scene.babylon(filepath=output)
 else:
