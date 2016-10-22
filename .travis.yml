@@ -1,0 +1,11 @@
+language: node_js
+
+node_js:
+  - node
+  - iojs
+  - 4
+
+before_install:
+  - sudo apt-get install blender wget
+  - wget https://github.com/BabylonJS/Babylon.js/raw/ebcda2bcb71cce1bc7febedaacf0f2c9d4602a90/Exporters/Blender/Blender2Babylon-5.0.zip
+  - blender --background --python-expr 'import bpy; import os; bpy.ops.wm.addon_install(filepath=os.path.abspath("Blender2Babylon-5.0.zip")); bpy.ops.wm.addon_enable(module="babylon-js")'
