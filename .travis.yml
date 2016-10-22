@@ -13,5 +13,5 @@ before_install:
   - wget https://github.com/BabylonJS/Babylon.js/raw/ebcda2bcb71cce1bc7febedaacf0f2c9d4602a90/Exporters/Blender/Blender2Babylon-5.0.zip
   # Ubuntu trusty gets blender-2.69 which doesn’t know about --python-expr yet.
   # So we have to do it all manually.
-  - echo 'import bpy; import os; bpy.ops.wm.addon_install(filepath=os.path.abspath("Blender2Babylon-5.0.zip")); bpy.ops.wm.addon_enable(module="babylon-js")' > .python-expr.py
+  - echo 'import bpy; import os; bpy.ops.wm.addon_install(filepath=os.path.abspath("Blender2Babylon-5.0.zip"));' > .python-expr.py
   - blender --background --python .python-expr.py

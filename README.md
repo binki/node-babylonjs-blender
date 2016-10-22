@@ -20,12 +20,7 @@ steps:
    Exporter](https://doc.babylonjs.com/exporters/Installing__the_Babylon_Exporter)
    from
    [here](https://github.com/BabylonJS/Babylon.js/tree/master/Exporters/Blender)
-   into Blender, enable it, and ensure you save your use profile. It
-   is presumably possible that Blender might make it possible for
-   scripts to temporarily enable addons for themselves (i.e., so that
-   you can have the addon installed but disabled in Blender for normal
-   work), but I don’t know how to do use Blender’s API—feel free to
-   submit a patch to do so. However, installation of the addon itself
+   into Blender. Installation of the addon itself
    is the job of the Package Manager you use, so I do not think that
    should be the responsibility of this module.
 

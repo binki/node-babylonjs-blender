@@ -18,6 +18,9 @@ bpy.ops.wm.open_mainfile(filepath=input)
 output = os.path.abspath(output)
 # Correct way to check for operator existence:
 # https://developer.blender.org/T38120
+if not 'bjs' in dir(bpy.ops):
+    # Try enabling it
+    bpy.ops.wm.addon_enable(module='babylon-js')
 if 'bjs' in dir(bpy.ops):
     bpy.ops.bjs.main(filepath=output)
 elif 'babylon' in dir(bpy.ops.scene):
