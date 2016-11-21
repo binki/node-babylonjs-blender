@@ -15,8 +15,9 @@ if (!fs.existsSync(tmpdir)) {
 }
 
 console.log(`Running in ${tmpdir}`);
-spawn.spawn.sync(spawn.sync('node', ['../../bin/node-babylonjs-blender', '../simple.blend', ]), {
+spawn.sync('node', ['../../bin/node-babylonjs-blender', '../simple.blend', ], {
   cwd: tmpdir,
+  stdio: 'inherit',
 });
 const output = path.join(tmpdir, 'simple.babylon');
 if (!fs.existsSync(output)) {

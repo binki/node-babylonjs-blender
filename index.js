@@ -19,7 +19,7 @@ const process = function (input, output) {
      * Remove output file first so we can validate success later by
      * checking for existence.
      */
-    return fs.unlink(output).catch(ex => fs.access(output, F_OK).catch(ex => fileNotExists).then(o => o === fileNotExists ? undefined : Promise.reject(ex))).then(() => childProcessPromise.exec('blender', ['-b', '-P', path.join(__dirname, 'export-scene-as-babylonjs.py')]), {
+    return fs.unlink(output).catch(ex => fs.access(output, F_OK).catch(ex => fileNotExists).then(o => o === fileNotExists ? undefined : Promise.reject(ex))).then(() => childProcessPromise.spawn('blender', ['-b', '-P', path.join(__dirname, 'export-scene-as-babylonjs.py')], {
 	env: Object.assign({}, process.env, {
 	    /*
 	     * Cannot figure out the proper way to pass arguments to
