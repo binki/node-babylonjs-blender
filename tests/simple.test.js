@@ -4,10 +4,12 @@
 const child_process = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const rimraf = require('rimraf-noglob');
 const spawn = require('cross-spawn');
 
 const tmpdir = path.join(__dirname, 'tmp');
 
+rimraf.sync(tmpdir);
 if (!fs.existsSync(tmpdir)) {
   fs.mkdirSync(tmpdir);
 }

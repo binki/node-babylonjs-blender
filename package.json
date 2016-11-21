@@ -24,5 +24,8 @@
     "cross-spawn": "^5.0.1",
     "node-getopt": "^0.2.3",
     "promisify-node": "^0.4.0"
+  },
+  "devDependencies": {
+    "rimraf-noglob": "^2.5.3"
   }
 }
