@@ -2,7 +2,7 @@ environment:
   nodejs_version: "6"
 
 install:
-  - ps: chocol install -y blender
+  - ps: choco install -y blender
   - cmd: SET PATH=%PATH%;C:\Program Files\Blender Foundation\Blender
   - ps: wget https://github.com/BabylonJS/Babylon.js/raw/ebcda2bcb71cce1bc7febedaacf0f2c9d4602a90/Exporters/Blender/Blender2Babylon-5.0.zip -outfile Blender2Babylon-5.0.zip
   - blender --background --python-expr "import bpy; import os; bpy.ops.wm.addon_install(filepath=os.path.abspath('Blender2Babylon-5.0.zip'));"
