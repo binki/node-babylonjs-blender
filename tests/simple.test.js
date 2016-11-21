@@ -4,7 +4,7 @@
 const child_process = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const shellEscape = require('shell-escape');
+const spawn = require('cross-spawn');
 
 const tmpdir = path.join(__dirname, 'tmp');
 
@@ -13,7 +13,7 @@ if (!fs.existsSync(tmpdir)) {
 }
 
 console.log(`Running in ${tmpdir}`);
-child_process.execSync(shellEscape([ 'node', '../../bin/node-babylonjs-blender', '../simple.blend', ]), {
+spawn.spawn.sync(spawn.sync('node', ['../../bin/node-babylonjs-blender', '../simple.blend', ]), {
   cwd: tmpdir,
 });
 const output = path.join(tmpdir, 'simple.babylon');
