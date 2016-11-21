@@ -1,6 +1,6 @@
 {
   "name": "babylonjs-blender",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Invoke blender to run the babylonjs exporter on a scene.",
   "main": "index.js",
   "scripts": {
