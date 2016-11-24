@@ -88,15 +88,3 @@ To reference in your project, install [the npm `babylonjs-blender`
 package](https://www.npmjs.com/package/babylonjs-blender) package:
 
     $ npm install --save babylonjs-blender
-
-# Platforms
-
-## Windows
-
-This works fine on Windows. However, you need to use a version of
-`shell-escape` which has
-[xxorax/node-shell-escape#9](https://github.com/xxorax/node-shell-escape/issues/9)
-fixed. As no fix has been published to npm yet, you’ll have to
-manually replace the version that `npm` downloads with the
-`win32-tests` branch of
-[seangenabe/node-shell-escape](https://github.com/seangenabe/node-shell-escape/tree/win32-tests).
