@@ -59,7 +59,6 @@ Promise.all(opt.argv.map(arg => lock.promise(() => {
     freeWorkers.push(worker);
   });
 })())).then(() => {
-  console.log('Cleaning workers');
   for (const worker of freeWorkers) {
     worker.end();
   }
