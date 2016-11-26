@@ -88,7 +88,7 @@ describe('BabylonjsBlenderWorker', function () {
       const worker = new BabylonjsBlenderWorker();
       return worker.process({
         input: path.join(__dirname, 'simple.blend'),
-        output: path.join(tmpdir, 'simple.babylons'),
+        output: path.join(tmpdir, 'simple.babylon'),
       }).then(job => {
         fs.accessSync(job.output);
       });
