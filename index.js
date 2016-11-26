@@ -156,7 +156,7 @@ const BabylonjsBlenderWorker = function (options) {
 
 const process = function (job) {
   const worker = new BabylonjsBlenderWorker();
-  worker.process(job).then(result => {
+  return worker.process.apply(worker, arguments).then(result => {
     worker.end();
     return result;
   });
