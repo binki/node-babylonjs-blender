@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/binki/node-babylonjs-blender.svg?branch=master)](https://travis-ci.org/binki/node-babylonjs-blender)
+[![Build status](https://ci.appveyor.com/api/projects/status/ynqc3cbu59ydrw0w?svg=true)](https://ci.appveyor.com/project/binki/node-babylonjs-blender)
 
 # Synopsis
 
