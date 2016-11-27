@@ -22,10 +22,30 @@ describe('BabylonjsBlenderWorker', function () {
       {
         input: path.join(__dirname, 'simple.blend'),
         output: path.join(tmpdir, 'simple.babylon'),
+        userData: {
+          artifact: 'Cube',
+        },
       },
       {
         input: path.join(__dirname, 'simple.blend'),
         output: path.join(tmpdir, 'blah.asdf'),
+        userData: {
+          artifact: 'Cube',
+        },
+      },
+      {
+        input: path.join(__dirname, 'sphere.blend'),
+        output: path.join(tmpdir, 'cube.babylon'),
+        userData: {
+          artifact: 'Sphere',
+        },
+      },
+      {
+        input: path.join(__dirname, 'simple.blend'),
+        output: path.join(tmpdir, 'simple2.babylon'),
+        userData: {
+          artifact: 'Cube',
+        },
       },
     ];
     const worker = new BabylonjsBlenderWorker();
@@ -41,7 +61,10 @@ describe('BabylonjsBlenderWorker', function () {
         jobs.forEach((job, i) => {
           const finishedJob = finishedJobs[i];
           assert.strictEqual(finishedJob, job, 'became non-identical object');
-          fs.accessSync(job.output);
+          const result = JSON.parse(fs.readFileSync(job.output));
+          const meshNames = result.meshes.map(mesh => mesh.name);
+          assert.strictEqual(meshNames.length, 1, 'Expected each scene to only have one mesh');
+          assert.strictEqual(meshNames[0], job.userData.artifact, 'Exported different scene than expected.');
         });
         done();
       }))
