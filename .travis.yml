@@ -12,6 +12,6 @@ before_install:
   # https://launchpad.net/~thomas-schiex/+archive/ubuntu/blender
   - sudo add-apt-repository ppa:thomas-schiex/blender -y
   - sudo apt-get update
-  - sudo apt-get install blender wget -y
+  - sudo apt-get install blender wget python3 -y
   - wget https://github.com/BabylonJS/Babylon.js/raw/ebcda2bcb71cce1bc7febedaacf0f2c9d4602a90/Exporters/Blender/Blender2Babylon-5.0.zip
   - blender --background --python-expr 'import bpy; import os; bpy.ops.wm.addon_install(filepath=os.path.abspath("Blender2Babylon-5.0.zip"));'
