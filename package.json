@@ -25,7 +25,6 @@
   "dependencies": {
     "cross-spawn": "^5.0.1",
     "gulp-lock": "0.0.3",
-    "json-stream": "^1.0.0",
     "node-getopt": "^0.2.3",
     "promisify-node": "^0.4.0",
     "through2": "^2.0.1",
