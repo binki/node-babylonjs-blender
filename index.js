@@ -3,7 +3,8 @@
 const path = require('path');
 const promisify = require('promisify-node');
 const fs = promisify('fs');
-const childProcessPromise = require('child-process-promise');
+const crossSpawn = require('cross-spawn');
+const stdioChat = require('./stdio-chat.js');
 const through2 = require('through2');
 const VError = require('verror').VError;
 
@@ -36,6 +37,8 @@ const fileNotExists = Symbol('file does not exist');
  * or pipe this stream anywhere, it will see job pass through it.
  */
 const BabylonjsBlenderWorker = function (options) {
+  let childInfo;
+
   const worker = through2.obj(Object.assign({
     /*
      * Set the highWaterMark to 1 because each each chunk is expected
@@ -80,24 +83,112 @@ const BabylonjsBlenderWorker = function (options) {
     fs.unlink(newOutput)
     /* It’s fine if the file already doesn’t exist. */
       .catch(ex => ex.code === 'ENOENT' ? undefined : Promise.reject(ex))
-      .then(() => childProcessPromise.spawn('blender', ['-b', '-P', path.join(__dirname, 'export-scene-as-babylonjs.py')], {
-        env: Object.assign({}, process.env, {
+      .then(() => {
+        if (childInfo) {
+          childInfo.chat.output.write({
+            input: chunk.input,
+            output: newOutput,
+          });
+        } else {
+          childInfo = {
+            instance: crossSpawn('blender', ['-b', '-P', path.join(__dirname, 'export-scene-as-babylonjs.py')], {
+              env: Object.assign({}, process.env, {
+                /*
+                 * Cannot figure out the proper way to pass arguments to
+                 * python scripts invoked via Blender. So, for now, will
+                 * just use environment variables.
+                 */
+                NODEJS_BABYLONJS_BLENDER_INPUT: chunk.input,
+                NODEJS_BABYLONJS_BLENDER_OUTPUT: newOutput,
+              }),
+              stdio: ['pipe', 'pipe', 'inherit'],
+            })
+              .on('error', () => childInfo = undefined)
+              .on('close', () => childInfo = undefined),
+          };
+          childInfo.chat = new stdioChat(childInfo.instance.stdout, childInfo.instance.stdin);
+        }
+
+        let handled = false;
+        let closeHandler;
+        let dataHandler;
+        let errorHandler;
+        const unsubscribe = () => {
           /*
-           * Cannot figure out the proper way to pass arguments to
-           * python scripts invoked via Blender. So, for now, will
-           * just use environment variables.
+           * If the process already exited, no point in bothreing to
+           * unsubscribe these as they’ll do nothing now.
            */
-          NODEJS_BABYLONJS_BLENDER_INPUT: chunk.input,
-          NODEJS_BABYLONJS_BLENDER_OUTPUT: newOutput,
-        }),
-      }).catch(ex => Promise.reject(new VError(ex, `Failed to invoke blender`))))
+          if (!childInfo) {
+            return;
+          }
+          childInfo.instance.removeListener('close', closeHandler);
+          childInfo.chat.input.removeListener('data', dataHandler);
+          childInfo.instance.removeListener('error', errorHandler);
+        };
+        return new Promise((resolve, reject) => {
+          /*
+           * If the child fails on first launch before even trying to
+           * run an export or cannot access the requested pipe, it
+           * will exit to indicate success/failure. For example, it
+           * might not be able to use the pipe but might indicate
+           * success with the job passed via the environment
+           * variables. Then we sort of hobble along by launching an
+           * instance per job.
+           */
+          closeHandler = function (code) {
+            if (!handled) {
+              if (code) {
+                reject(new Error(`Blender exited with ${code}`));
+              } else {
+                resolve();
+              }
+              handled = true;
+            }
+          };
+          childInfo.instance.on('close', closeHandler);
+
+          dataHandler = function (chunk) {
+            if (!handled) {
+              if (chunk === true) {
+                resolve();
+              } else {
+                reject(new Error(`Unrecognized message from blender: ${JSON.stringify(chunk)}`));
+              }
+              handled = true;
+            }
+          };
+          childInfo.chat.input.on('data', dataHandler);
+
+          /*
+           * We mostly expect this handler to be used to detect errors
+           * on process spawning. We probably don’t correctly handle
+           * if this event is emitted after the process launches
+           * successfully.
+           */
+          errorHandler = function (ex) {
+            if (!handled) {
+              reject(ex);
+              handled = true;
+            }
+          };
+          childInfo.instance.on('error', errorHandler);
+        }).then(result => {
+          unsubscribe();
+          return result;
+        }, ex => {
+          unsubscribe();
+          return Promise.reject(ex);
+        });
+      })
       .then(
         results => fs.access(newOutput)
           .catch(ex => Promise.reject(new VError({
             cause: ex,
             info: {
+              /* How to propery get this information?
               blenderStderr: results.stderr,
               blenderStdout: results.stdout,
+              */
             },
           }, `Blender did not emit ${newOutput}`))))
       .then(
@@ -105,6 +196,15 @@ const BabylonjsBlenderWorker = function (options) {
           .catch(ex => Promise.reject(new VError(ex, `Unable to rename ${newOutput} to ${chunk.output}`))))
       .then(() => callback(undefined, chunk), ex => callback(ex))
     ;
+  }, function (callback) {
+    if (childInfo) {
+      /* Closing the pipe should trigger graceful exit. */
+      childInfo.chat.output.end();
+      childInfo.instance.on('error', callback);
+      childInfo.instance.on('exit', code => callback());
+    } else {
+      callback();
+    }
   });
 
   worker.process = function (job) {
