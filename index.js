@@ -8,8 +8,6 @@ const stdioChat = require('./stdio-chat.js');
 const through2 = require('through2');
 const VError = require('verror').VError;
 
-const fileNotExists = Symbol('file does not exist');
-
 /**
  * A worker is capable of processing one blender file at a time and
  * requires its lifetime to be managed by the caller. It is an object
