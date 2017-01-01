@@ -23,9 +23,11 @@ steps:
    Exporter](https://doc.babylonjs.com/exporters/Installing__the_Babylon_Exporter)
    from
    [here](https://github.com/BabylonJS/Babylon.js/tree/master/Exporters/Blender)
-   into Blender. Installation of the addon itself
-   is the job of the Package Manager you use, so I do not think that
-   should be the responsibility of this module.
+   into Blender. You may use the `node-babylonjs-blender-install`
+   command to automatically do this for you. This command downloads a
+   specific known working addon version by default, but if you specify
+   a `.zip` file as an argument it will install that as a Blender
+   addon for you (even non-BabylonJS addons).
 
 # Usage
 
