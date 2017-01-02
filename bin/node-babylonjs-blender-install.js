@@ -25,7 +25,7 @@ will be downloaded and installed.
 
 const installBlenderAddOn = path => {
   return new Promise((resolve, reject) => {
-  crossSpawn('blender', [
+    crossSpawn('blender', [
       '--background',
       '--python-expr',
       'import bpy; import os; bpy.ops.wm.addon_install(filepath=os.path.abspath(' + JSON.stringify(filename) + '));',
@@ -37,7 +37,7 @@ const installBlenderAddOn = path => {
       } else {
         resolve();
       }
-    });
+    }).on('error', reject);
   });
 };
 
@@ -68,10 +68,10 @@ request(uri)
   })
   .on('response', response => {
     if (response.statusCode != 200) {
-      throw new Error(`Unexpected response: ${result.statusCode}`);
+      cliHandleRejection(new Error(`Unexpected response: ${response.statusCode}`));
     }
   })
   .pipe(fs.createWriteStream(filename).on('close', () => {
-    installBlenderAddOn(filename);
+    installBlenderAddOn(filename).catch(cliHandleRejection);
   }))
 ;
