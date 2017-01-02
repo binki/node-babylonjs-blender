@@ -16,12 +16,16 @@ bpy.ops.wm.open_mainfile(filepath=input)
 # mkdir(dirname(filepath)) if not path.isdir(dirname(filepath)) which
 # fails when filepath has no slashes in it.
 output = os.path.abspath(output)
+
 # Correct way to check for operator existence:
 # https://developer.blender.org/T38120
 if not 'bjs' in dir(bpy.ops):
     # Try enabling it
     bpy.ops.wm.addon_enable(module='babylon-js')
 if 'bjs' in dir(bpy.ops):
+    # Get access to the scene to set props on it. http://blender.stackexchange.com/a/39346/20603
+    bpy.context.scene.inlineTextures = True
+
     bpy.ops.bjs.main(filepath=output)
 elif 'babylon' in dir(bpy.ops.scene):
     # Fallback to old name of API.

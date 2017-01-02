@@ -37,6 +37,7 @@
     "accum": "^0.3.7",
     "dependency-lint": "^4.2.0",
     "mocha": "^3.2.0",
-    "rimraf-noglob": "^2.5.3"
+    "rimraf-noglob": "^2.5.3",
+    "tmp-promise": "benjamingr/tmp-promise#04536f6088ba03e7a7fa16ed5da9fe08cb3abcc5"
   }
 }
