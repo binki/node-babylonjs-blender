@@ -37,13 +37,40 @@ describe('texture', function () {
     }).then(cb).catch(ex => new Promise((resolve, reject) => setTimeout(() => reject(ex), 10000)));
   }, {unsafeCleanup: true});
 
-  it('is inlined by default', function () {
-    return runBlender(info => {
+  it('supports inlining through option', function () {
+    return runBlender({
+      inlineTextures: true,
+    }, info => {
       // Verify that there is an inlined texture.
       const material = info.content.materials[0];
       const texture = material.diffuseTexture;
       assert.ok(texture.base64String, 'Expected inline data');
       assert.equal(texture.base64String.substring(0, 'data:image/'.length), 'data:image/', 'Expected inline image data');
+      assert.strictEqual(info.job.inlineTextures, true, 'inlineTextures option should be true');
+      assert.strictEqual(info.job.builtAssets.length, 0, 'Expected no assets');
+    });
+  });
+
+  it('supports emitting external textures', function () {
+    // Verify that textures are emitted when not inline properly.
+    return runBlender(info => {
+      // Verify that textures were emitted.
+      const material = info.content.materials[0];
+      const texture = material.diffuseTexture;
+      // Expected output path is to be next to be next to output with
+      // name.
+      const textureName = texture.name;
+      // Verify that the textures are not inline.
+      assert.strictEqual(info.job.inlineTextures, false, 'inlineTextures option should still be false');
+      assert.strictEqual(texture.base64String, undefined, 'Unexpected inline data');
+      assert.strictEqual(info.job.builtAssets.length, 1, 'Expected one emitted asset');
+      for (const texturePath of [
+        path.join(path.dirname(info.job.output), textureName),
+        path.join(info.job.outputPath, textureName),
+        path.join(info.job.outputPath, info.job.builtAssets[0]),
+      ]) {
+        fs.accessSync(texturePath);
+      }
     });
   });
 });

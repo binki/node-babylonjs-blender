@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
+const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const rimraf = require('rimraf-noglob');
@@ -52,3 +53,35 @@ jobFiles.forEach(jobFile => {
   const output = jobFile.replace(/\.blend$/, '.babylon');
   const outputJson = JSON.parse(fs.readFileSync(output));
 });
+
+{
+  const inputFile = path.join(tmpdir, 'texture.blend');
+  const outputFile = path.join(tmpdir, 'texture.babylon');
+  rimraf.sync(tmpdir);
+  fs.mkdirSync(tmpdir);
+  console.log(`Running CLI with inline textures`);
+  fs.linkSync(path.join(__dirname, 'texture.blend'), inputFile);
+  spawn.sync('node', [path.join(path.dirname(__dirname), 'bin', 'node-babylonjs-blender'), '-i', inputFile, ], {
+    cwd: tmpdir,
+    stdio: 'inherit',
+  });
+  const outputJson = JSON.parse(fs.readFileSync(outputFile));
+  assert.ok(outputJson.materials[0].diffuseTexture.base64String, 'Expecting inline texture');
+}
+
+{
+  const inputFile = path.join(tmpdir, 'texture.blend');
+  const outputFile = path.join(tmpdir, 'texture.babylon');
+  rimraf.sync(tmpdir);
+  fs.mkdirSync(tmpdir);
+  console.log(`Running CLI with texture emission`);
+  fs.linkSync(path.join(__dirname, 'texture.blend'), inputFile);
+  spawn.sync('node', [path.join(path.dirname(__dirname), 'bin', 'node-babylonjs-blender'), inputFile, ], {
+    cwd: tmpdir,
+    stdio: 'inherit',
+  });
+  const outputJson = JSON.parse(fs.readFileSync(outputFile));
+  assert.equal(outputJson.materials[0].diffuseTexture.base64String, undefined, 'Expected no inline texture');
+  fs.accessSync(path.join(tmpdir, outputJson.materials[0].diffuseTexture.name));
+}
+

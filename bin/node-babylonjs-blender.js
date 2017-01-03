@@ -8,11 +8,13 @@ const path = require('path');
 const through2 = require('through2');
 
 const opt = nodeGetopt.create([
-    [ 'j', 'jobs=JOBS', 'Maximum number of jobs to start or unspecified for unlimited. Default is -j=1. POSIX does not seem to support make-style “-j” and neither does this getopt library, so specify the empty string (“-j \'\'”) to request unlimited.', ],
-    [ 'h', 'help', 'Show this help and exit.', ],
+  [ 'j', 'jobs=JOBS', 'Maximum number of jobs to start or unspecified for unlimited. Default is -j=1. POSIX does not seem to support make-style “-j” and neither does this getopt library, so specify the empty string (“-j \'\'”) to request unlimited.', ],
+  [ 'i', 'inline-textures', 'Have the add-on embed textures instead of writing them out as separate files. Easier to get working but may drastically increase output file size and prevent BabylonJS from doing its own incremental loading.', ],
+  [ 'h', 'help', 'Show this help and exit.', ],
 ])
       .bindHelp()
-      .parseSystem();
+      .parseSystem()
+;
 
 if (opt.options.jobs === undefined) {
     opt.options.jobs = '1';
@@ -47,6 +49,7 @@ Promise.all(opt.argv.map(arg => lock.promise(() => {
   console.log(`<- ${arg}`);
   const worker = freeWorkers.pop() || new BabylonjsBlenderWorker();
   return worker.process({
+    inlineTextures: !!opt.options['inline-textures'],
     input: arg,
     /*
      * Specify our own output here. The API will output the file to
@@ -56,6 +59,9 @@ Promise.all(opt.argv.map(arg => lock.promise(() => {
     output: `${path.basename(arg, '.blend')}.babylon`,
   }).then(job => {
     console.log(`-> ${job.output}`);
+    for (let builtAsset of job.builtAssets) {
+      console.log(`-> ${path.join(path.dirname(job.output), builtAsset)}`);
+    }
     freeWorkers.push(worker);
   });
 })())).then(() => {

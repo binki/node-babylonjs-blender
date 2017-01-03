@@ -6,6 +6,7 @@ import sys
 
 input = os.getenv('NODEJS_BABYLONJS_BLENDER_INPUT')
 output = os.getenv('NODEJS_BABYLONJS_BLENDER_OUTPUT')
+asset_path = os.getenv('NODEJS_BABYLONJS_BLENDER_ASSETPATH')
 
 print('input=%s' % input, file=sys.stderr)
 print('output=%s' % output, file=sys.stderr)
@@ -24,7 +25,9 @@ if not 'bjs' in dir(bpy.ops):
     bpy.ops.wm.addon_enable(module='babylon-js')
 if 'bjs' in dir(bpy.ops):
     # Get access to the scene to set props on it. http://blender.stackexchange.com/a/39346/20603
-    bpy.context.scene.inlineTextures = True
+    bpy.context.scene.inlineTextures = asset_path is None
+    if asset_path is not None:
+        bpy.context.scene.textureDir = os.path.abspath(asset_path)
 
     bpy.ops.bjs.main(filepath=output)
 elif 'babylon' in dir(bpy.ops.scene):

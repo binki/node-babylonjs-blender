@@ -79,6 +79,15 @@ Unlimited jobs example for completeness:
 
     $ node-babylonjs-blender -j '' *.blend
 
+To request the exporter to inline textures (instead of emitting them
+as separate files), use the `-i` option. This will make the resulting
+files easier to load but will prevent BabylonJS from doing incremental
+loading.
+
+For a review of options, see `-h` or `--help`:
+
+    $ node-babylonjs-blender --help
+
 ## API
 
 ### Installation
@@ -108,6 +117,7 @@ file.
     });
     babylonjsBlender({
       input: 'myFile.blend',
+      inlineTextures: true,
     }).then(job => {
       console.log(`Blender wrote output to ${job.output}.`);
     });
@@ -117,15 +127,28 @@ file.
 As mentioned, each job is represented by a plain object. The keys are
 defined as follows:
 
-* `input` (required): The path to the input Blender file.
+* `input` *in* (required): The path to the input Blender file.
 
-* `output` (optional): The path to the destination file. Will be set
-   for you if unspecified.
+* `output` *in/out* (optional): The path to the destination file. Will
+   be set for you if unspecified.
 
-* `userData` (optional): This key is set aside for the caller’s use.
-   No future version of this library will repurpose this key for
-   itself. This may be useful to tack arbitrary data to a job. Note
-   that you may opt to use Symbols directly on the object instead.
+* `outputPath` *in/out* (optional): The path to store textures
+   in. Defaults to `path.dirname(output)`. Will be set for you if
+   unspecified.
+
+* `builtAssets` *out*: The filenames (relative to `outputPath`) of any
+   generated textures. If `inlineTextures` will always be empty.
+
+* `inlineTextures` *in/out* (optional): Inline textures rather than
+   writing them as separate files. This asks the blender exporter
+   addon to embed the textures as `data:image…` URis directly in the
+   generated babylon file. Defaults to `false`.
+
+* `userData` *in/out* (optional): This key is set aside for the
+   caller’s use.  No future version of this library will repurpose
+   this key for itself. This may be useful to tack arbitrary data to a
+   job. Note that you may opt to use Symbols directly on the object
+   instead.
 
 ### Batching
 

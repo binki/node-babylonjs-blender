@@ -5,9 +5,18 @@ const promisify = require('promisify-node');
 const fs = promisify('fs');
 const childProcessPromise = require('child-process-promise');
 const through2 = require('through2');
+const tmp = require('tmp-promise');
 const VError = require('verror').VError;
 
 const fileNotExists = Symbol('file does not exist');
+
+const conditionalTmpWithDir = (condition, options, callback) => {
+  if (condition) {
+    return tmp.withDir(callback, options);
+  } else {
+    return Promise.resolve().then(callback);
+  }
+};
 
 /**
  * A worker is capable of processing one blender file at a time and
@@ -58,6 +67,11 @@ const BabylonjsBlenderWorker = function (options) {
     }
     /* Don’t use basename: output in same directory as input. */
     chunk.output = chunk.output || `${chunk.input.replace(/\.blend$/, '')}.babylon`;
+    chunk.inlineTextures = !!chunk.inlineTextures;
+    if (chunk.outputPath === undefined) {
+      chunk.outputPath = path.dirname(chunk.output);
+    }
+    chunk.builtAssets = [];
 
     /*
      * If the requested filename does not end in “.babylon”,
@@ -80,8 +94,11 @@ const BabylonjsBlenderWorker = function (options) {
     fs.unlink(newOutput)
     /* It’s fine if the file already doesn’t exist. */
       .catch(ex => ex.code === 'ENOENT' ? undefined : Promise.reject(ex))
-      .then(() => childProcessPromise.spawn('blender', ['-b', '-P', path.join(__dirname, 'export-scene-as-babylonjs.py')], {
-        env: Object.assign({}, process.env, {
+      .then(() => conditionalTmpWithDir(!chunk.inlineTextures, {
+        dir: chunk.outputPath,
+        unsafeCleanup: true,
+      }, textureTmpDirInfo => {
+        const env = Object.assign({}, process.env, {
           /*
            * Cannot figure out the proper way to pass arguments to
            * python scripts invoked via Blender. So, for now, will
@@ -89,18 +106,42 @@ const BabylonjsBlenderWorker = function (options) {
            */
           NODEJS_BABYLONJS_BLENDER_INPUT: chunk.input,
           NODEJS_BABYLONJS_BLENDER_OUTPUT: newOutput,
-        }),
-      }).catch(ex => Promise.reject(new VError(ex, `Failed to invoke blender`))))
-      .then(
-        results => fs.access(newOutput)
-          .catch(ex => Promise.reject(new VError({
-            cause: ex,
-            info: {
-              blenderStderr: results.stderr,
-              blenderStdout: results.stdout,
-            },
-          }, `Blender did not emit ${newOutput}`))))
-      .then(
+        });
+        if (chunk.inlineTextures) {
+          delete env.NODEJS_BABYLONJS_BLENDER_ASSETPATH;
+        } else {
+          env.NODEJS_BABYLONJS_BLENDER_ASSETPATH = textureTmpDirInfo.path;
+        }
+
+        return childProcessPromise.spawn('blender', ['-b', '-P', path.join(__dirname, 'export-scene-as-babylonjs.py')], {
+        env: env,
+        }).catch(ex => {
+          throw new VError(ex, `Failed to invoke blender`);
+        }).then(results => {
+          return fs.access(newOutput);
+        }).catch(ex => Promise.reject(new VError({
+          cause: ex,
+          info: {
+            blenderStderr: results.stderr,
+            blenderStdout: results.stdout,
+          },
+        }, `Blender did not emit ${newOutput}`))).then(() => {
+          // If requested, discover and copy assets.
+          if (!chunk.inlineTextures) {
+            return fs.readdir(textureTmpDirInfo.path).then(textureFileNames => {
+              return textureFileNames.reduce((acc, textureFileName) => {
+                // Go serially to avoid aggravating problems which
+                // cause people to use graceful-fs.
+                return acc.then(() => {
+                  return fs.rename(path.join(textureTmpDirInfo.path, textureFileName), path.join(chunk.outputPath, textureFileName)).then(() => {
+                    chunk.builtAssets.push(textureFileName);
+                  });
+                });
+              }, Promise.resolve());
+            });
+          }
+        });
+      })).then(
         () => fs.rename(newOutput, chunk.output)
           .catch(ex => Promise.reject(new VError(ex, `Unable to rename ${newOutput} to ${chunk.output}`))))
       .then(() => callback(undefined, chunk), ex => callback(ex))
