@@ -55,7 +55,7 @@ if (opt.argv.length) {
   opt.argv.reduce((prior, path) => prior.then(() => installBlenderAddOn(path)), Promise.resolve()).catch(cliHandleRejection);
 } else {
   // Hardcoded URI.
-  const uri = 'https://github.com/BabylonJS/Babylon.js/raw/6dfc63dab7de0b227dd1a34192e3e70c466c6189/Exporters/Blender/Blender2Babylon-5.1.zip';
+  const uri = 'https://github.com/BabylonJS/Babylon.js/raw/2d28796098b4c69a3d04fe90314054d5d73c4acb/Exporters/Blender/Blender2Babylon-5.2.zip';
   const filename = /[^\/]*$/.exec(uri)[0];
 
   console.log(`Downloading ${uri}…`);
